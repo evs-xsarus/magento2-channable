@@ -80,11 +80,13 @@ class CreateInvoice
      *
      * @throws LocalizedException
      */
-    public function execute($order)
+    public function execute(OrderInterface $order)
     {
         if ($order->canInvoice()) {
             $invoice = $this->invoiceService->prepareInvoice($order);
             $invoice->setRequestedCaptureCase(Invoice::CAPTURE_OFFLINE);
+            $invoice->setTransactionFee($order->getTransactionFee());
+            $invoice->setGrandTotal($invoice->getGrandTotal() + $invoice->getTransactionFee());
             $invoice->register();
 
             $this->transaction->addObject($invoice);
